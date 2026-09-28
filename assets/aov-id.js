@@ -6,7 +6,7 @@ function lang() {
 }
 
 function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&", "<": "<", ">": ">", '"': """, "'": "&#39;" }[c]));
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
 function pick(v) {
@@ -19,19 +19,23 @@ function isAovView() {
   return /\/games\/aov(?:\/|$)/.test(location.pathname) || /htw0702aov/.test(location.pathname);
 }
 
-function isAdminView() {
-  return location.hostname === "admin.htw0702.com" || /\/admin\/?$/.test(location.pathname);
+function injectStyle() {
+  if (document.getElementById("aov-skin")) return;
+  const s = document.createElement("style");
+  s.id = "aov-skin";
+  s.textContent = `#aov-root{display:grid;gap:28px;padding:8px 0 48px}#aov-root .aov-hero{position:relative;overflow:hidden;padding:28px 24px 26px}#aov-root .aov-kicker{margin:0 0 10px;color:var(--accent);letter-spacing:.18em;font-size:12px;font-weight:800;text-transform:uppercase}#aov-root .aov-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}#aov-root .aov-stat{padding:18px 16px;min-height:120px}#aov-root .aov-stat b{display:block;font-family:var(--display);font-size:clamp(28px,6vw,44px);letter-spacing:-.05em;line-height:.95}#aov-root .aov-heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}#aov-root .aov-hero-card{padding:18px 16px 16px;min-height:140px}#aov-root .aov-bar{height:6px;border-radius:99px;background:rgba(244,240,232,.08);overflow:hidden;margin-top:12px}#aov-root .aov-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--glow),var(--accent))}#aov-root .aov-table{width:100%;border-collapse:collapse;font-size:14px}#aov-root .aov-table th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:10px 8px;border-bottom:1px solid var(--line)}#aov-root .aov-table td{padding:12px 8px;border-bottom:1px solid rgba(244,240,232,.06);vertical-align:top}#aov-root .aov-table tr.win td:nth-child(4){color:#7ad7ea;font-weight:800}#aov-root .aov-table tr.loss td:nth-child(4){color:#ff8aa8;font-weight:800}#aov-root .table-wrap{overflow:auto;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line);background:rgba(16,14,26,.62)}#aov-root h2{margin:0 0 14px;font-family:var(--display);font-size:clamp(28px,6vw,52px);letter-spacing:-.045em}`;
+  document.head.append(s);
 }
 
 async function loadRecord() {
-  try {
-    const r = await fetch("/api/aov", { headers: { Accept: "application/json" } });
-    if (r.ok) return r.json();
-  } catch {}
-  try {
-    const r = await fetch("/assets/aov-htw0702aov.json", { headers: { Accept: "application/json" } });
-    if (r.ok) return r.json();
-  } catch {}
+  for (const url of ["/assets/aov-htw0702aov.json", "/api/aov"]) {
+    try {
+      const r = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!r.ok) continue;
+      const data = await r.json();
+      if (data && (data.handle || data.matches || data.rankCard)) return data;
+    } catch {}
+  }
   return null;
 }
 
@@ -40,94 +44,58 @@ function ensureRoot() {
   if (!main) return null;
   let root = document.getElementById("aov-root");
   if (!root) {
-    main.innerHTML = '<section class="section" id="aov-root"></section>';
+    main.innerHTML = '<div id="aov-root"></div>';
     root = document.getElementById("aov-root");
   }
   return root;
 }
 
 function renderPublic(data) {
+  injectStyle();
   const root = ensureRoot();
   if (!root || !data) return;
+  const matches = Array.isArray(data.matches) ? data.matches : [];
+  const heroes = Array.isArray(data.heroPool) ? data.heroPool : [];
+  const seasons = Array.isArray(data.seasons) ? data.seasons : [];
   const rank = pick(data.rank);
+  const played = data.stats?.played || matches.length;
+  const wins = data.stats?.wins || matches.filter((m) => String(m.result).includes("勝")).length;
+  const wr = data.stats?.winRate || "";
   root.innerHTML = `
-    <article class="mos magnetic reveal in" data-aov-id="${ID}">
-      <span class="num">AOV</span>
+    <article class="mos aov-hero" data-aov-id="${ID}">
+      <p class="aov-kicker">Arena of Valor / 傳說對決</p>
       <em>${esc(pick(data.role) || "隊長")}</em>
       <strong>${esc(data.handle || ID)}</strong>
-      <p>UID ${esc(data.uid || "")} · ${esc(rank)} · ${esc(pick(data.server))}</p>
-      <p>${esc(pick(data.note))}</p>
+      <p>UID ${esc(data.uid || "")} · ${esc(pick(data.server))}</p>
+      <p>${esc(rank)} · ${esc(data.rankCard?.season || pick(data.season))} · 更新 ${esc(data.updated || data.rankCard?.updatedAt || "")}</p>
     </article>
-    <section class="section">
-      <h2>段位</h2>
-      <p>${esc(data.rankCard?.season || pick(data.season) || "")} · 更新 ${esc(data.updated || data.rankCard?.updatedAt || "")}</p>
-      <p>${esc(rank)} · 積分 ${esc(data.rankCard?.points || "")}/100</p>
+    <section>
+      <h2>戰況</h2>
+      <div class="aov-stats">
+        <article class="mos aov-stat"><small>場次</small><b>${esc(played)}</b></article>
+        <article class="mos aov-stat"><small>勝場</small><b>${esc(wins)}</b></article>
+        <article class="mos aov-stat"><small>勝率</small><b>${esc(wr)}%</b></article>
+        <article class="mos aov-stat"><small>KDA</small><b>${esc(data.stats?.kda || "—")}</b></article>
+        <article class="mos aov-stat"><small>MVP</small><b>${esc(data.stats?.mvp || "—")}</b></article>
+        <article class="mos aov-stat"><small>段位積分</small><b>${esc(data.rankCard?.points || "—")}</b><p>讀數 ${esc(data.rankCard?.queueReadout || "")}/${esc(data.rankCard?.queueReadoutMax || "100")}</p></article>
+      </div>
     </section>
-    <section class="section">
+    <section>
       <h2>常用英雄</h2>
-      <div class="cards">${(data.heroPool || []).map((h) => `<article class="mos reveal in"><em>${esc(h.hero || "")}</em><strong>${esc(h.matches || "0")} 場</strong><p>${esc(pick(h.note) || `勝率 ${h.winRate || "—"}%`)}</p></article>`).join("")}</div>
+      <div class="aov-heroes">${heroes.map((h) => {
+        const wrn = Number(h.winRate || 0);
+        return `<article class="mos aov-hero-card"><em>${esc(h.hero || "")}</em><strong>${esc(h.matches || "0")} 場</strong><p>勝率 ${esc(h.winRate || "—")}% · 戰力 ${esc(h.power || "—")}</p><p>${esc(pick(h.note))}</p><div class="aov-bar"><i style="width:${Math.max(4, Math.min(100, wrn))}%"></i></div></article>`;
+      }).join("") || "<p>尚無英雄資料</p>"}</div>
     </section>
-    <section class="section">
-      <h2>戰績 ${esc(String((data.matches || []).length))}</h2>
-      <p>場次 ${esc(data.stats?.played || "")} · 勝 ${esc(data.stats?.wins || "")} · 勝率 ${esc(data.stats?.winRate || "")}% · KDA ${esc(data.stats?.kda || "")} · MVP ${esc(data.stats?.mvp || "")}</p>
-      <div class="table-wrap"><table class="aov-matches"><thead><tr><th>日期</th><th>模式</th><th>英雄</th><th>結果</th><th>KDA</th><th>積分</th></tr></thead><tbody>${(data.matches || []).map((m) => {
+    ${seasons.length ? `<section><h2>模式</h2><div class="aov-heroes">${seasons.map((s) => `<article class="mos aov-hero-card"><em>${esc(s.mode || "模式")}</em><strong>${esc(s.winRate || "—")}%</strong><p>${esc(s.played || "0")} 場 · ${esc(s.wins || "0")} 勝</p></article>`).join("")}</div></section>` : ""}
+    <section>
+      <h2>對局 ${matches.length}</h2>
+      <div class="table-wrap"><table class="aov-table"><thead><tr><th>時間</th><th>模式</th><th>英雄</th><th>結果</th><th>KDA</th><th>分路</th><th>積分</th></tr></thead><tbody>${matches.map((m) => {
         const res = m.result || "";
         const cls = res.includes("勝") ? "win" : res.includes("敗") ? "loss" : "";
-        return `<tr class="${cls}"><td>${esc(m.date || m.playedAt || "")}</td><td>${esc(m.mode || "")}</td><td>${esc(m.hero || "—")}</td><td>${esc(res)}</td><td>${esc(m.kda || "")}</td><td>${esc(m.rankDelta || "")}</td></tr>`;
+        return `<tr class="${cls}"><td>${esc(m.playedAt || m.date || "")}${m.duration ? `<br><small>${esc(m.duration)}</small>` : ""}</td><td>${esc(m.mode || "")}</td><td>${esc(m.hero || "—")}</td><td>${esc(res)}</td><td>${esc(m.kda || "")}</td><td>${esc(m.lane || "")}</td><td>${esc(m.rankDelta || "")}</td></tr>`;
       }).join("")}</tbody></table></div>
     </section>`;
-}
-
-function pretty(v) {
-  return JSON.stringify(v ?? {}, null, 2);
-}
-
-async function paintAdmin() {
-  if (!isAdminView()) return;
-  const studio = document.getElementById("studio");
-  if (!studio || document.getElementById("aov-editor")) return;
-  const data = (await loadRecord()) || { handle: ID, matches: [] };
-  studio.insertAdjacentHTML("beforeend", `<section class="section" id="aov-editor"><h2>傳說對決 · 手動更新</h2><p>不接任何外部戰績 API。公開頁讀這裡存的資料。</p><form id="aov-form"><label>ID <input name="handle" value="${esc(data.handle || ID)}" maxlength="40"></label><label>UID <input name="uid" value="${esc(data.uid || "")}" maxlength="32"></label><label>更新日期 <input name="updated" value="${esc(data.updated || "")}" maxlength="10"></label><label>段位（中） <input name="rank_zh" value="${esc(data.rank?.zh || "")}" maxlength="80"></label><label>段位（英） <input name="rank_en" value="${esc(data.rank?.en || "")}" maxlength="80"></label><label>備註（中） <textarea name="note_zh" rows="2">${esc(data.note?.zh || "")}</textarea></label><label>stats JSON <textarea name="stats" rows="6">${esc(pretty(data.stats))}</textarea></label><label>rankCard JSON <textarea name="rankCard" rows="6">${esc(pretty(data.rankCard))}</textarea></label><label>heroPool JSON <textarea name="heroPool" rows="8">${esc(pretty(data.heroPool || []))}</textarea></label><label>matches JSON <textarea name="matches" rows="16">${esc(pretty(data.matches || []))}</textarea></label><button class="button primary" type="submit">儲存</button><p id="aov-status" role="status"></p></form></section>`);
-  document.getElementById("aov-form")?.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
-    const status = document.getElementById("aov-status");
-    const fd = new FormData(ev.target);
-    const parse = (name, fallback) => {
-      const raw = String(fd.get(name) || "").trim();
-      if (!raw) return fallback;
-      return JSON.parse(raw);
-    };
-    status.textContent = "儲存中…";
-    try {
-      const me = await fetch("/api/me").then((r) => {
-        if (!r.ok) throw new Error("未登入");
-        return r.json();
-      });
-      const body = {
-        handle: fd.get("handle"),
-        uid: fd.get("uid"),
-        updated: fd.get("updated"),
-        rank: { zh: fd.get("rank_zh"), en: fd.get("rank_en") },
-        note: { zh: fd.get("note_zh"), en: data.note?.en || "", jp: data.note?.jp || "" },
-        stats: parse("stats", data.stats || {}),
-        rankCard: parse("rankCard", data.rankCard || {}),
-        heroPool: parse("heroPool", data.heroPool || []),
-        matches: parse("matches", data.matches || []),
-        seasons: data.seasons || [],
-        gameSnapshot: data.gameSnapshot || {},
-        manual: true,
-      };
-      const r = await fetch("/api/aov", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json", "X-CSRF-Token": me.csrf },
-        body: JSON.stringify(body),
-      });
-      const out = await r.json();
-      status.textContent = r.ok ? `已儲存 ${out.matches?.length || 0} 場` : `失敗：${out.error || r.status}`;
-    } catch (err) {
-      status.textContent = `失敗：${err.message || err}`;
-    }
-  });
 }
 
 async function paintPublic() {
@@ -140,8 +108,6 @@ const main = document.getElementById("main");
 if (main) {
   new MutationObserver(() => {
     if (isAovView() && !document.querySelector("[data-aov-id]")) paintPublic();
-    if (isAdminView()) paintAdmin();
   }).observe(main, { childList: true, subtree: true });
 }
 paintPublic();
-setTimeout(paintAdmin, 400);
