@@ -16,7 +16,7 @@ function pick(v) {
 }
 
 function isAovView() {
-  return /\/games\/aov(?:\/|$)/.test(location.pathname);
+  return /\/games\/aov(?:\/|$)/.test(location.pathname) || /htw0702aov/.test(location.pathname);
 }
 
 function isAdminView() {
@@ -35,6 +35,17 @@ async function loadRecord() {
   return null;
 }
 
+function ensureRoot() {
+  let root = document.getElementById("aov-root");
+  const main = document.getElementById("main");
+  if (!main) return null;
+  if (!root) {
+    main.innerHTML = '<section class="section" id="aov-root"></section>';
+    root = document.getElementById("aov-root");
+  }
+  return root;
+}
+
 function statLine(data) {
   const s = data.stats || {};
   return [
@@ -51,10 +62,7 @@ function statLine(data) {
 
 function heroCards(data) {
   return (data.heroPool || [])
-    .map(
-      (h) =>
-        `<article class="mos reveal in"><em>${esc(h.hero || "")}</em><strong>${esc(h.matches || "0")} 場</strong><p>${esc(pick(h.note) || `勝率 ${h.winRate || "—"}%`)}</p></article>`,
-    )
+    .map((h) => `<article class="mos reveal in"><em>${esc(h.hero || "")}</em><strong>${esc(h.matches || "0")} 場</strong><p>${esc(pick(h.note) || `勝率 ${h.winRate || "—"}%`)}</p></article>`)
     .join("");
 }
 
@@ -69,7 +77,7 @@ function matchRows(data) {
 }
 
 function renderPublic(data) {
-  const root = document.getElementById("aov-root");
+  const root = ensureRoot();
   if (!root || !data) return;
   const rank = pick(data.rank) || [data.rankCard?.tier, data.rankCard?.division, data.rankCard?.stars ? `★${data.rankCard.stars}` : ""].filter(Boolean).join(" ");
   root.innerHTML = `
@@ -101,7 +109,7 @@ function editorFields(data) {
   return `
     <section class="section" id="aov-editor">
       <h2>傳說對決 · 手動更新</h2>
-      <p>公開頁讀 <code>/api/aov</code>。這裡改完會寫進資料庫；沒登入就無法儲存。</p>
+      <p>公開頁讀 <code>/api/aov</code>。登入後才能存檔。</p>
       <form id="aov-form">
         <label>ID <input name="handle" value="${esc(data.handle || ID)}" maxlength="40"></label>
         <label>UID <input name="uid" value="${esc(data.uid || "")}" maxlength="32"></label>
@@ -152,9 +160,6 @@ async function paintAdmin() {
         rankCard: parse("rankCard", data.rankCard || {}),
         heroPool: parse("heroPool", data.heroPool || []),
         matches: parse("matches", data.matches || []),
-        gameSnapshot: data.gameSnapshot || {},
-        seasons: data.seasons || [],
-        powerBoard: data.powerBoard || {},
         manual: true,
       };
       const r = await fetch("/api/aov", {
@@ -178,9 +183,13 @@ async function paintPublic() {
 
 addEventListener("aov:draw", paintPublic);
 addEventListener("aov:admin", paintAdmin);
-addEventListener("popstate", () => setTimeout(() => {
-  paintPublic();
-  paintAdmin();
-}, 0));
-if (isAovView()) paintPublic();
-if (isAdminView()) setTimeout(paintAdmin, 400);
+const main = document.getElementById("main");
+if (main) {
+  const observer = new MutationObserver(() => {
+    if (isAovView() && !document.querySelector("[data-aov-id]")) paintPublic();
+    if (isAdminView()) paintAdmin();
+  });
+  observer.observe(main, { childList: true, subtree: true });
+}
+paintPublic();
+setTimeout(paintAdmin, 400);
