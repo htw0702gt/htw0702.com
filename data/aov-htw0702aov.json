@@ -1,1 +1,29 @@
-PLACEHOLDER_WILL_FAIL
+{
+  "handle": "htw0702aov",
+  "uid": "3678194289083498",
+  "role": { "zh": "隊長", "en": "Leader" },
+  "rank": { "zh": "鑽石 V ★3", "en": "Diamond V ★3" },
+  "season": { "zh": "S4 2026", "en": "S4 2026" },
+  "server": { "zh": "純潔之翼", "en": "Server 2" },
+  "peakRank": { "zh": "鑽石 V ★3", "en": "Diamond V ★3" },
+  "signatureHeroes": { "zh": "娜塔亞、克里希、穆加爵", "en": "" },
+  "updated": "2026-09-28",
+  "manual": true,
+  "note": { "zh": "從暮霞一次複製。之後只在後台手改。", "en": "Copied once. Manual only." },
+  "stats": { "played": "75", "wins": "45", "losses": "30", "winRate": "60.0", "kda": "1.97", "mvp": "22", "kills": "336", "deaths": "315", "assists": "284" },
+  "rankCard": { "season": "S4 2026", "tier": "diamond", "division": "V", "stars": "3", "points": "43", "queueReadout": "83", "queueReadoutMax": "100", "seasonChallenge": "10/10", "updatedAt": "2026-09-27" },
+  "heroPool": [
+    { "hero": "娜塔亞", "matches": "47", "winRate": "55", "power": "3321", "note": { "zh": "K/D/A 8.2 / 4.9 / 5.0" } },
+    { "hero": "穆加爵", "matches": "1", "winRate": "0", "power": "100", "note": { "zh": "K/D/A 0.0 / 4.0 / 2.0" } },
+    { "hero": "克里希", "matches": "1", "winRate": "100", "power": "314", "note": { "zh": "K/D/A 3.5 / 8.5 / 7.5" } },
+    { "hero": "貂蟬", "matches": "1", "winRate": "100", "power": "", "note": { "zh": "K/D/A 4.0 / 5.0 / 6.0" } },
+    { "hero": "特爾安娜絲", "matches": "1", "winRate": "100", "power": "313", "note": { "zh": "K/D/A 7.0 / 3.0 / 6.0" } }
+  ],
+  "seasons": [
+    { "mode": "排位賽", "played": "53", "wins": "35", "winRate": "66" },
+    { "mode": "經典競技", "played": "31", "wins": "21", "winRate": "67.7" },
+    { "mode": "競賽模式", "played": "5", "wins": "3", "winRate": "60" },
+    { "mode": "冠軍賽", "played": "4", "wins": "1", "winRate": "25" }
+  ],
+  "matches": []
+}
