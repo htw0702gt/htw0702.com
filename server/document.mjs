@@ -17,7 +17,14 @@ export const KNOWN = new Set([
   "admin",
   "now",
   "games",
+  "games/aov",
+  "games/aov/htw0702aov",
 ]);
+
+export function isKnownRoute(route) {
+  if (KNOWN.has(route)) return true;
+  return String(route || "").startsWith("games/aov");
+}
 
 function esc(s) {
   return String(s ?? "").replace(
@@ -35,6 +42,7 @@ function esc(s) {
 
 export function pageKey(route) {
   if (route === "me" || route === "contact") return "social";
+  if (String(route || "").startsWith("games")) return "games";
   return route || "home";
 }
 
@@ -67,7 +75,7 @@ export function renderDocument(html, { locale, route, status, query }) {
   const person = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "王顥筳",
+    name: "王顚筳",
     alternateName: ["筳筳", "Wang Hao Ting", "htw0702"],
     url: "https://htw0702.com/tw",
     email: "taiwan@htw0702.com",
