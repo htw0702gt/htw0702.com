@@ -3,17 +3,14 @@ import {settings,validateSettings} from './settings.mjs';
 import {normalize,decodeEntry} from './core.mjs';
 import {session,authReady,authOrigin,start,callback,hash,cookie,random} from './auth.mjs';
 import {syncNotion} from './notion.mjs';
-import {readAov,writeAov,MAX as AOV_MAX} from './aov.mjs';
-import fallbackAov from '../data/aov-htw0702aov.json' with { type: 'json' };
 const json=(d,status=200)=>new Response(JSON.stringify(d),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY'}});
-async function smallJson(req,limit=50000){const text=await req.text();if(text.length>limit)throw new Error('too large');return JSON.parse(text);}
+async function smallJson(req){const text=await req.text();if(text.length>50000)throw new Error('too large');return JSON.parse(text);}
 export async function onRequest({request:req,env}){
  const url=new URL(req.url),path=url.pathname.slice(5),method=req.method;
  try{
  if(path==='appearance'&&method==='GET')return json(await settings(env));
  if(path==='health'&&method==='GET')return json({auth:authReady(env)});
  if(path==='public'&&method==='GET'){if(!env.DB)return json({configured:false,entries:[]});const r=await env.DB.prepare("SELECT id,kind,locale,slug,title,body,meta,updated_at FROM entries WHERE visibility='public' AND kind=? AND locale=? ORDER BY updated_at DESC LIMIT 500").bind(url.searchParams.get('kind')||'',url.searchParams.get('locale')||'tw').all();return json({configured:true,entries:r.results.map(decodeEntry)});}
- if((path==='aov'||path==='aov/htw0702aov')&&method==='GET')return json(await readAov(env,fallbackAov));
  if(path==='auth/start'&&method==='GET')return start(req,env);
  if(path==='auth/callback'&&method==='POST'){if(Number(req.headers.get('Content-Length')||0)>10000)return json({error:'too large'},413);return callback(req,env);}
  if(path==='notion/pull'&&method==='POST'){
@@ -21,10 +18,6 @@ export async function onRequest({request:req,env}){
  }
  const user=await session(req,env);if(!user)return json({error:'unauthorized'},401);
  if(!['GET','HEAD'].includes(method)&&(req.headers.get('Origin')!==env.ADMIN_ORIGIN||req.headers.get('X-CSRF-Token')!==user.csrf))return json({error:'forbidden'},403);
- if((path==='aov'||path==='aov/htw0702aov')&&method==='PUT'){
-  let raw;try{raw=await smallJson(req,AOV_MAX);}catch{return json({error:'invalid aov'},400);}
-  try{return json(await writeAov(env,raw,fallbackAov));}catch(e){return json({error:String(e.message||e)},400);}
- }
  if(path==='appearance'&&method==='POST'){let x;try{x=validateSettings(await smallJson(req));}catch{return json({error:'invalid appearance'},400);}await env.DB.prepare("INSERT INTO sync_state(name,value) VALUES('appearance',?) ON CONFLICT(name) DO UPDATE SET value=excluded.value").bind(JSON.stringify(x)).run();return json(x);}
  if(path==='slack/test'&&method==='POST')return json(await notifySlack(env));
  if(path==='me'&&method==='GET')return json({csrf:user.csrf,connections:{auth:true,database:!!env.DB,notion:!!(env.NOTION_TOKEN&&env.NOTION_DATA_SOURCE_ID),slack:!!env.SLACK_WEBHOOK_URL}});
