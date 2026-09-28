@@ -24,11 +24,12 @@ function injectStyle() {
   const s = document.createElement("style");
   s.id = "aov-skin";
   s.textContent = `#aov-root{display:grid;gap:28px;padding:8px 0 48px}#aov-root .aov-hero{position:relative;overflow:hidden;padding:28px 24px 26px}#aov-root .aov-kicker{margin:0 0 10px;color:var(--accent);letter-spacing:.18em;font-size:12px;font-weight:800;text-transform:uppercase}#aov-root .aov-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}#aov-root .aov-stat{padding:18px 16px;min-height:120px}#aov-root .aov-stat b{display:block;font-family:var(--display);font-size:clamp(28px,6vw,44px);letter-spacing:-.05em;line-height:.95}#aov-root .aov-heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}#aov-root .aov-hero-card{padding:18px 16px 16px;min-height:140px}#aov-root .aov-bar{height:6px;border-radius:99px;background:rgba(244,240,232,.08);overflow:hidden;margin-top:12px}#aov-root .aov-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--glow),var(--accent))}#aov-root .aov-table{width:100%;border-collapse:collapse;font-size:14px}#aov-root .aov-table th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:10px 8px;border-bottom:1px solid var(--line)}#aov-root .aov-table td{padding:12px 8px;border-bottom:1px solid rgba(244,240,232,.06);vertical-align:top}#aov-root .aov-table tr.win td:nth-child(4){color:#7ad7ea;font-weight:800}#aov-root .aov-table tr.loss td:nth-child(4){color:#ff8aa8;font-weight:800}#aov-root .table-wrap{overflow:auto;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line);background:rgba(16,14,26,.62)}#aov-root h2{margin:0 0 14px;font-family:var(--display);font-size:clamp(28px,6vw,52px);letter-spacing:-.045em}`;
+  s.textContent += `#aov-root details.aov-detail{padding:16px;margin:8px 0;border-radius:16px}#aov-root details.aov-detail summary{cursor:pointer}#aov-root details.aov-detail dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}#aov-root details.aov-detail dt{font-size:12px;color:var(--muted)}#aov-root details.aov-detail dd{margin:0;overflow-wrap:anywhere}`;
   document.head.append(s);
 }
 
 async function loadRecord() {
-  for (const url of ["/assets/aov-htw0702aov.json", "/api/aov"]) {
+  for (const url of ["/api/aov", "/assets/aov-htw0702aov.json"]) {
     try {
       const r = await fetch(url, { headers: { Accept: "application/json" } });
       if (!r.ok) continue;
@@ -61,6 +62,7 @@ function renderPublic(data) {
   const played = data.stats?.played || matches.length;
   const wins = data.stats?.wins || matches.filter((m) => String(m.result).includes("勝")).length;
   const wr = data.stats?.winRate || "";
+  const detail = m => Object.entries(m).filter(([key,value]) => !["id","date","playedAt","hero","result","mode","label"].includes(key) && value !== "" && value != null && ["string","number","boolean"].includes(typeof value)).map(([key,value]) => `<div><dt>${esc(key)}</dt><dd>${esc(value)}</dd></div>`).join("");
   root.innerHTML = `
     <article class="mos aov-hero" data-aov-id="${ID}">
       <p class="aov-kicker">Arena of Valor / 傳說對決</p>
@@ -95,7 +97,9 @@ function renderPublic(data) {
         const cls = res.includes("勝") ? "win" : res.includes("敗") ? "loss" : "";
         return `<tr class="${cls}"><td>${esc(m.playedAt || m.date || "")}${m.duration ? `<br><small>${esc(m.duration)}</small>` : ""}</td><td>${esc(m.mode || "")}</td><td>${esc(m.hero || "—")}</td><td>${esc(res)}</td><td>${esc(m.kda || "")}</td><td>${esc(m.lane || "")}</td><td>${esc(m.rankDelta || "")}</td></tr>`;
       }).join("")}</tbody></table></div>
-    </section>`;
+    </section>
+    <section><h2>對局詳細資料</h2>${matches.map(m => `<details class="mos aov-detail"><summary>${esc(m.playedAt || m.date || "")} · ${esc(m.mode || m.label || "對戰")} · ${esc(m.hero || "—")} · ${esc(m.result || "—")}</summary><dl>${detail(m)}</dl></details>`).join("")}</section>
+    <p><a href="https://moohsia.com/roster/htw0702aov">MOOHSIA 原始頁面</a> · <a href="https://htw0702.com">htw0702.com</a></p>`;
 }
 
 async function paintPublic() {

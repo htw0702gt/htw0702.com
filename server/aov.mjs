@@ -5,12 +5,18 @@ function clip(v, n) { return String(v ?? "").trim().slice(0, n); }
 function pair(v) { const o = v && typeof v === "object" ? v : {}; return { zh: clip(o.zh, 80), en: clip(o.en, 80) }; }
 function cleanMatch(row) {
   const m = row && typeof row === "object" ? row : {};
-  return { id: clip(m.id, 48), date: clip(m.date, 10), playedAt: clip(m.playedAt, 40), mode: clip(m.mode || m.label, 40), hero: clip(m.hero, 40), result: clip(m.result, 8), kda: clip(m.kda, 24), kills: clip(m.kills, 8), deaths: clip(m.deaths, 8), assists: clip(m.assists, 8), gold: clip(m.gold, 12), rankDelta: clip(m.rankDelta, 8), mvp: m.mvp === true };
+  const out = {};
+  for (const [key, value] of Object.entries(m)) {
+    if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(key) || key.length > 32) continue;
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") out[key] = typeof value === "string" ? clip(value, 500) : value;
+    else if (value && typeof value === "object" && !Array.isArray(value)) out[key] = Object.fromEntries(Object.entries(value).filter(([k,v]) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(k) && (typeof v === "string" || typeof v === "number")).map(([k,v]) => [k, typeof v === "string" ? clip(v, 500) : v]));
+  }
+  return out;
 }
 export function cleanAov(input, fallback) {
   const src = input && typeof input === "object" ? input : {};
   const base = fallback && typeof fallback === "object" ? fallback : {};
-  const matches = Array.isArray(src.matches) ? src.matches.slice(0, 200).map(cleanMatch) : Array.isArray(base.matches) ? base.matches : [];
+  const matches = Array.isArray(src.matches) ? src.matches.slice(0, 500).map(cleanMatch) : Array.isArray(base.matches) ? base.matches : [];
   return {
     handle: clip(src.handle || base.handle || HANDLE, 40) || HANDLE,
     uid: clip(src.uid || base.uid, 32),
@@ -25,6 +31,8 @@ export function cleanAov(input, fallback) {
     note: { zh: clip(src.note?.zh || base.note?.zh, 240), en: clip(src.note?.en || base.note?.en, 240), jp: clip(src.note?.jp || base.note?.jp, 240) },
     stats: src.stats && typeof src.stats === "object" ? src.stats : base.stats || {},
     rankCard: src.rankCard && typeof src.rankCard === "object" ? src.rankCard : base.rankCard || {},
+    name: pair(src.name || base.name), lane: pair(src.lane || base.lane), title: pair(src.title || base.title), bio: pair(src.bio || base.bio),
+    avatar: src.avatar ?? base.avatar ?? null, joinDate: clip(src.joinDate || base.joinDate, 40),
     heroPool: Array.isArray(src.heroPool) ? src.heroPool.slice(0, 20) : base.heroPool || [],
     seasons: Array.isArray(src.seasons) ? src.seasons.slice(0, 12) : base.seasons || [],
     reputation: src.reputation && typeof src.reputation === "object" ? src.reputation : base.reputation || {},
@@ -32,6 +40,10 @@ export function cleanAov(input, fallback) {
     honorTitles: Array.isArray(src.honorTitles) ? src.honorTitles : base.honorTitles || [],
     gameSnapshot: src.gameSnapshot && typeof src.gameSnapshot === "object" ? src.gameSnapshot : base.gameSnapshot || {},
     powerBoard: src.powerBoard && typeof src.powerBoard === "object" ? src.powerBoard : base.powerBoard || {},
+    yearTreasure: src.yearTreasure && typeof src.yearTreasure === "object" ? src.yearTreasure : base.yearTreasure || {},
+    weeklyReports: Array.isArray(src.weeklyReports) ? src.weeklyReports : base.weeklyReports || [],
+    skins: Array.isArray(src.skins) ? src.skins : base.skins || [],
+    builds: Array.isArray(src.builds) ? src.builds : base.builds || [],
     matches,
   };
 }
@@ -39,7 +51,12 @@ export async function readAov(env, fallback) {
   if (env?.DB) {
     try {
       const row = await env.DB.prepare("SELECT value FROM sync_state WHERE name = ?").bind(KEY).first();
-      if (row?.value) return cleanAov(JSON.parse(row.value), fallback);
+      if (row?.value) {
+        const current = cleanAov(JSON.parse(row.value), fallback);
+        const existing = new Set(current.matches.map(m => m.id || `${m.playedAt}|${m.hero}|${m.result}`));
+        current.matches.push(...(fallback.matches || []).filter(m => !existing.has(m.id || `${m.playedAt}|${m.hero}|${m.result}`)));
+        return current;
+      }
     } catch {}
   }
   return cleanAov(fallback, fallback);
