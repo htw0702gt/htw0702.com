@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS aov_login_limits (
+  id TEXT PRIMARY KEY,
+  attempts INTEGER NOT NULL,
+  until INTEGER NOT NULL
+);

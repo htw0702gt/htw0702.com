@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>htw0702aov 資料管理</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:#080f1e;color:#f0f5fb}
+    *{box-sizing:border-box}body{margin:0}header{padding:24px max(24px,calc((100vw - 1100px)/2));border-bottom:1px solid #33425a;background:#101d32}h1{margin:.2em 0;font-size:clamp(25px,4vw,40px)}small,.hint{color:#a8bad1}main{max-width:1100px;margin:auto;padding:30px 24px 80px}a{color:#8ddbe6}form,.panel{background:#101d32;border:1px solid #33425a;border-radius:18px;padding:24px;margin:20px 0}label{display:grid;gap:7px;margin:12px 0}input,textarea,button{font:inherit}input,textarea{width:100%;color:#f0f5fb;background:#091426;border:1px solid #50617b;border-radius:9px;padding:12px}textarea{min-height:340px;font:13px/1.5 ui-monospace,SFMono-Regular,monospace;resize:vertical}button{border:1px solid #78cbd9;border-radius:9px;background:#0b3b52;color:#fff;padding:10px 16px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.toolbar button{flex:none}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin:20px 0}.tabs button[aria-selected="true"]{background:#31788b}.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.grid label{margin:0}#status{min-height:24px}.danger{color:#ff9f9f}.ok{color:#8edcaa}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #33425a;padding:9px;text-align:left}th{color:#a8bad1;font-size:12px}.scroll{overflow:auto;max-height:55vh}details{border-top:1px solid #33425a;padding:12px 0}summary{cursor:pointer}section[hidden]{display:none}
+  </style>
+  <script type="module" src="/assets/aov-admin.js"></script>
+</head>
+<body>
+<header><small>MOOHSIA / 傳說對決</small><h1>htw0702aov 資料管理</h1><a href="/games/aov/htw0702aov">檢視公開頁面</a></header>
+<main>
+  <p id="status" role="status" aria-live="polite"></p>
+  <form id="login">
+    <h2>管理員登入</h2><p class="hint">使用與 admin.moohsia.com 相同的帳號和密碼。密碼不會存進 GitHub。</p>
+    <label>帳號<input name="username" autocomplete="username" required></label>
+    <label>密碼<input name="password" type="password" autocomplete="current-password" required></label>
+    <button>登入</button>
+  </form>
+  <div id="editor" hidden>
+    <div class="toolbar"><strong id="count"></strong><button id="save" type="button">儲存所有資料</button><button id="reload" type="button">重新讀取</button><button id="logout" type="button">登出</button></div>
+    <p class="hint">每個區塊都可編輯；切換區塊時保留未儲存內容。儲存會一次更新整份個人資料。JSON 區塊保留原始對戰與圖表的全部欄位。</p>
+    <nav class="tabs" aria-label="資料區塊" id="tabs"></nav>
+    <section id="fields" class="panel"><h2>個人資料</h2><div class="grid" id="fields-grid"></div></section>
+    <section id="json-section" class="panel" hidden><h2 id="section-title"></h2><p class="hint" id="section-help"></p><textarea id="json-editor" spellcheck="false" aria-label="JSON 資料"></textarea></section>
+    <section id="matches-preview" class="panel" hidden><h2>對戰預覽</h2><div class="scroll"><table><thead><tr><th>時間</th><th>模式</th><th>英雄</th><th>勝負</th><th>KDA</th></tr></thead><tbody id="match-rows"></tbody></table></div></section>
+  </div>
+</main>
+</body></html>

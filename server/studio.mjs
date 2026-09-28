@@ -4,12 +4,14 @@ import {normalize,decodeEntry} from './core.mjs';
 import {session,authReady,authOrigin,start,callback,hash,cookie,random} from './auth.mjs';
 import {syncNotion} from './notion.mjs';
 import {readAov,writeAov,MAX as AOV_MAX} from './aov.mjs';
+import {aovAdmin} from './aov-admin.mjs';
 import fallbackAov from '../data/aov-htw0702aov.json' with { type: 'json' };
 const json=(d,status=200)=>new Response(JSON.stringify(d),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY'}});
 async function smallJson(req,limit=50000){const text=await req.text();if(text.length>limit)throw new Error('too large');return JSON.parse(text);}
 export async function onRequest({request:req,env}){
  const url=new URL(req.url),path=url.pathname.slice(5),method=req.method;
  try{
+ if(path.startsWith('aov-admin/'))return aovAdmin(req,env);
  if(path==='appearance'&&method==='GET')return json(await settings(env));
  if(path==='health'&&method==='GET')return json({auth:authReady(env)});
  if(path==='public'&&method==='GET'){if(!env.DB)return json({configured:false,entries:[]});const r=await env.DB.prepare("SELECT id,kind,locale,slug,title,body,meta,updated_at FROM entries WHERE visibility='public' AND kind=? AND locale=? ORDER BY updated_at DESC LIMIT 500").bind(url.searchParams.get('kind')||'',url.searchParams.get('locale')||'tw').all();return json({configured:true,entries:r.results.map(decodeEntry)});}

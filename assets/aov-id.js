@@ -1,3 +1,4 @@
+import { renderCharts } from './aov-charts.js';
 const ID = "htw0702aov";
 
 function lang() {
@@ -25,6 +26,7 @@ function injectStyle() {
   s.id = "aov-skin";
   s.textContent = `#aov-root{display:grid;gap:28px;padding:8px 0 48px}#aov-root .aov-hero{position:relative;overflow:hidden;padding:28px 24px 26px}#aov-root .aov-kicker{margin:0 0 10px;color:var(--accent);letter-spacing:.18em;font-size:12px;font-weight:800;text-transform:uppercase}#aov-root .aov-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}#aov-root .aov-stat{padding:18px 16px;min-height:120px}#aov-root .aov-stat b{display:block;font-family:var(--display);font-size:clamp(28px,6vw,44px);letter-spacing:-.05em;line-height:.95}#aov-root .aov-heroes{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}#aov-root .aov-hero-card{padding:18px 16px 16px;min-height:140px}#aov-root .aov-bar{height:6px;border-radius:99px;background:rgba(244,240,232,.08);overflow:hidden;margin-top:12px}#aov-root .aov-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--glow),var(--accent))}#aov-root .aov-table{width:100%;border-collapse:collapse;font-size:14px}#aov-root .aov-table th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:10px 8px;border-bottom:1px solid var(--line)}#aov-root .aov-table td{padding:12px 8px;border-bottom:1px solid rgba(244,240,232,.06);vertical-align:top}#aov-root .aov-table tr.win td:nth-child(4){color:#7ad7ea;font-weight:800}#aov-root .aov-table tr.loss td:nth-child(4){color:#ff8aa8;font-weight:800}#aov-root .table-wrap{overflow:auto;border-radius:22px;box-shadow:inset 0 0 0 1px var(--line);background:rgba(16,14,26,.62)}#aov-root h2{margin:0 0 14px;font-family:var(--display);font-size:clamp(28px,6vw,52px);letter-spacing:-.045em}`;
   s.textContent += `#aov-root details.aov-detail{padding:16px;margin:8px 0;border-radius:16px}#aov-root details.aov-detail summary{cursor:pointer}#aov-root details.aov-detail dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}#aov-root details.aov-detail dt{font-size:12px;color:var(--muted)}#aov-root details.aov-detail dd{margin:0;overflow-wrap:anywhere}`;
+  s.textContent += `#aov-root .aov-detail{padding:16px;margin:9px 0;border-radius:12px}#aov-root .aov-detail summary{cursor:pointer}#aov-root .aov-detail pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;max-height:60vh;overflow:auto}#aov-root .aov-chart-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:14px}#aov-root .aov-chart{padding:20px;overflow:hidden}#aov-root .aov-chart h3{margin:0 0 14px;font-size:1.15rem}#aov-root .aov-chart svg{display:block;width:100%;height:180px}#aov-root .aov-chart .aov-ring{display:flex;align-items:center;gap:20px}#aov-root .aov-ring svg{width:125px;height:125px}#aov-root .aov-chart-row{display:grid;grid-template-columns:minmax(85px,1fr) minmax(70px,2fr) auto;gap:8px;align-items:center;margin:10px 0;font-size:13px}#aov-root .aov-track{height:8px;border-radius:10px;background:#ffffff20}#aov-root .aov-track i{display:block;height:100%;border-radius:10px;background:#7dd9e7}#aov-root .aov-heat{display:grid;grid-template-columns:repeat(auto-fit,minmax(37px,1fr));gap:4px}#aov-root .aov-heat span{background:rgba(125,217,231,calc(.12 + var(--intensity)*.7));border-radius:5px;text-align:center;padding:5px 2px;min-height:46px}#aov-root .aov-heat b,#aov-root .aov-heat small{display:block;font-size:10px}`;
   document.head.append(s);
 }
 
@@ -49,6 +51,15 @@ function ensureRoot() {
     root = document.getElementById("aov-root");
   }
   return root;
+}
+
+function structuredSections(data) {
+  const labels={rankCard:'段位資訊',powerBoard:'英雄戰力排行',gameSnapshot:'遊戲內對戰資料',yearTreasure:'年度寶藏',reputation:'信譽系統',weeklyReports:'每週報告',championships:'冠軍賽',honorTitles:'稱號',skins:'造型',builds:'配裝'};
+  return Object.entries(labels).map(([key,title])=>{
+    const value=data[key];
+    if(!value || (Array.isArray(value)&&!value.length) || (typeof value==='object'&&!Array.isArray(value)&&!Object.values(value).some(Boolean)))return '';
+    return `<details class="mos aov-detail"><summary>${esc(title)}</summary><pre>${esc(JSON.stringify(value,null,2))}</pre></details>`;
+  }).join('');
 }
 
 function renderPublic(data) {
@@ -90,6 +101,8 @@ function renderPublic(data) {
       }).join("") || "<p>尚無英雄資料</p>"}</div>
     </section>
     ${seasons.length ? `<section><h2>模式</h2><div class="aov-heroes">${seasons.map((s) => `<article class="mos aov-hero-card"><em>${esc(s.mode || "模式")}</em><strong>${esc(s.winRate || "—")}%</strong><p>${esc(s.played || "0")} 場 · ${esc(s.wins || "0")} 勝</p></article>`).join("")}</div></section>` : ""}
+    ${renderCharts(data, esc)}
+    <section><h2>其他遊戲資料</h2>${structuredSections(data)}</section>
     <section>
       <h2>對局 ${matches.length}</h2>
       <div class="table-wrap"><table class="aov-table"><thead><tr><th>時間</th><th>模式</th><th>英雄</th><th>結果</th><th>KDA</th><th>分路</th><th>積分</th></tr></thead><tbody>${matches.map((m) => {
@@ -98,7 +111,7 @@ function renderPublic(data) {
         return `<tr class="${cls}"><td>${esc(m.playedAt || m.date || "")}${m.duration ? `<br><small>${esc(m.duration)}</small>` : ""}</td><td>${esc(m.mode || "")}</td><td>${esc(m.hero || "—")}</td><td>${esc(res)}</td><td>${esc(m.kda || "")}</td><td>${esc(m.lane || "")}</td><td>${esc(m.rankDelta || "")}</td></tr>`;
       }).join("")}</tbody></table></div>
     </section>
-    <section><h2>對局詳細資料</h2>${matches.map(m => `<details class="mos aov-detail"><summary>${esc(m.playedAt || m.date || "")} · ${esc(m.mode || m.label || "對戰")} · ${esc(m.hero || "—")} · ${esc(m.result || "—")}</summary><dl>${detail(m)}</dl></details>`).join("")}</section>
+    <section><h2>對局詳細資料</h2>${matches.map(m => `<details class="mos aov-detail"><summary>${esc(m.playedAt || m.date || "")} · ${esc(m.mode || m.label || "對戰")} · ${esc(m.hero || "—")} · ${esc(m.result || "—")}</summary><dl>${detail(m)}</dl>${m.board?.length?`<h3>雙方對戰明細</h3><pre>${esc(JSON.stringify(m.board,null,2))}</pre>`:''}</details>`).join("")}</section>
     <p><a href="https://moohsia.com/roster/htw0702aov">MOOHSIA 原始頁面</a> · <a href="https://htw0702.com">htw0702.com</a></p>`;
 }
 

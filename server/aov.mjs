@@ -20,6 +20,7 @@ export function cleanAov(input, fallback) {
   const base = fallback && typeof fallback === "object" ? fallback : {};
   const matches = Array.isArray(src.matches) ? src.matches.slice(0, 500).map(cleanMatch) : Array.isArray(base.matches) ? base.matches : [];
   return {
+    archiveVersion: src.archiveVersion === 2 ? 2 : 0,
     handle: clip(src.handle || base.handle || HANDLE, 40) || HANDLE,
     uid: clip(src.uid || base.uid, 32),
     role: pair(src.role || base.role),
@@ -54,9 +55,18 @@ export async function readAov(env, fallback) {
     try {
       const row = await env.DB.prepare("SELECT value FROM sync_state WHERE name = ?").bind(KEY).first();
       if (row?.value) {
-        const current = cleanAov(JSON.parse(row.value), fallback);
-        const existing = new Set(current.matches.map(m => m.id || `${m.playedAt}|${m.hero}|${m.result}`));
-        current.matches.push(...(fallback.matches || []).filter(m => !existing.has(m.id || `${m.playedAt}|${m.hero}|${m.result}`)));
+        const stored = JSON.parse(row.value);
+        const current = cleanAov(stored, fallback);
+        if (stored.archiveVersion === 2) return current;
+        const signature = m => `${m.playedAt || m.date}|${m.result}|${m.kda}|${m.mode || m.label}`;
+        const ids = new Set(current.matches.map(m => m.id).filter(Boolean));
+        const signatures = new Set(current.matches.map(signature));
+        for (const match of fallback.matches || []) {
+          if ((match.id && ids.has(match.id)) || signatures.has(signature(match))) continue;
+          current.matches.push(match);
+          if (match.id) ids.add(match.id);
+          signatures.add(signature(match));
+        }
         return current;
       }
     } catch {}
@@ -65,6 +75,7 @@ export async function readAov(env, fallback) {
 }
 export async function writeAov(env, raw, fallback) {
   const next = cleanAov(raw, fallback);
+  next.archiveVersion = 2;
   const text = JSON.stringify(next);
   if (text.length > MAX) throw new Error("too large");
   await env.DB.prepare("INSERT INTO sync_state(name,value) VALUES(?,?) ON CONFLICT(name) DO UPDATE SET value=excluded.value").bind(KEY, text).run();
