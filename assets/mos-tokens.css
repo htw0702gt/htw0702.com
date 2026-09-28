@@ -1,0 +1,27 @@
+:root {
+  --ink: #f7f1ea;
+  --muted: #d7c6d1;
+  --paper: #07040d;
+  --card: rgba(18, 8, 24, 0.78);
+  --line: rgba(247, 241, 234, 0.14);
+  --accent: #ff3b86;
+  --glow: #ffb020;
+  --night: #05030a;
+  --cream: #f7f1ea;
+  --ember: #ffb020;
+  --mag: #ff3b86;
+  --violet: #c4a6ff;
+}
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(124, 58, 237, 0.18), transparent 55%),
+    radial-gradient(900px 500px at -10% 20%, rgba(255, 59, 134, 0.1), transparent 50%),
+    var(--paper);
+}
+::selection {
+  background: #ff3b86;
+  color: #fff;
+}
+.brand .mark {
+  background: linear-gradient(135deg, #ff3b86, #ffb020);
+}
