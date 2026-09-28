@@ -26,11 +26,18 @@ function isKnown(route){return KNOWN.has(route)||String(route||"").startsWith("g
 async function published(env,locale,kind){let remote=[];try{remote=(await notionQuery(env,{locale,kind})).items||[]}catch{remote=[]}remote=normalizePublic(remote);if(remote.length)return remote;return fallbackItems(locale,kind)}
 async function searchItems(env,locale,q){const chunks=await Promise.all(SEARCH_KINDS.map(kind=>published(env,locale,kind)));let items=chunks.flat();if(env.DB){try{const r=await env.DB.prepare("SELECT id,kind,locale,slug,title,body,updated_at,source FROM entries WHERE visibility='public' AND locale=? ORDER BY updated_at DESC LIMIT 500").bind(locale).all();const ids=new Set(items.map(x=>x.id));for(const x of normalizePublic((r.results||[]).map(row=>({id:row.id,name:row.title,body:row.body,slug:row.slug,kind:row.kind,locale:row.locale,updated:row.updated_at,source:row.source}))))if(x.source!=="notion"&&!ids.has(x.id))items.push(x)}catch{}}items.push(...guideItems(locale));const query=q.trim().toLowerCase();if(query)items=items.filter(x=>(`${x.name} ${x.body} ${x.slug}`).toLowerCase().includes(query));const seen=new Set(),out=[];for(const x of items){const k=`${x.kind}:${x.slug}`;if(seen.has(k))continue;seen.add(k);out.push({name:x.name,kind:x.kind,slug:x.slug,updated:x.updated||null,href:hrefFor(locale,x),snippet:String(x.body||"").replace(/\s+/g," ").slice(0,180)});if(out.length>=40)break}return out}
 async function document(request,env,status,locale,route){const shell=await env.ASSETS.fetch(new Request(new URL("/index.html",request.url)));const html=renderDocument(await shell.text(),{locale,route,status,query:Boolean(new URL(request.url).searchParams.get("q"))});const headers={"content-type":"text/html; charset=utf-8","cache-control":route==="admin"?"no-store":"public, max-age=300","x-content-type-options":"nosniff","referrer-policy":"strict-origin-when-cross-origin"};return new Response(request.method==="HEAD"?null:html,{status,headers})}
+function usablePlayer(player){
+  if(!player||typeof player!=="object")return false;
+  if(Array.isArray(player.matches)&&player.matches.length)return true;
+  if(player.handle&&(player.stats?.played||player.rank))return true;
+  return false;
+}
 async function mosPlayer(){
   const r=await fetch("https://moohsia.com/api/content",{headers:{accept:"application/json","user-agent":"htw0702.com"}});
   if(!r.ok)return null;
   const d=await r.json();
-  return d?.player||null;
+  const player=d?.player||null;
+  return usablePlayer(player)&&Array.isArray(player.matches)&&player.matches.length?player:null;
 }
 export default{async fetch(request,env){const u=new URL(request.url),path=u.pathname.replace(/\/+$/,"")||"/";
   if(path==="/admin"&&(request.method==="GET"||request.method==="HEAD")){
