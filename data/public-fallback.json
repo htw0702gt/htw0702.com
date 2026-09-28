@@ -5,39 +5,39 @@
       "kind": "wiki",
       "name": "個人維基｜關於筳筳",
       "slug": "about",
-      "updated": "2026-09-25",
-      "body": "王顥筳（筳筳，Wang Hao Ting）。台灣。這個頁面是公開維基。內容以 Notion 中 Publish 為 true、Visibility 為 public 的紀錄為準。私人筆記不會出現在這裡。網站 htw0702.com 提供繁體中文、英文與日文。"
+      "updated": "2026-09-28",
+      "body": "王顧筳（筳筳，Wang Hao Ting）。台灣。這個頁面是公開維基。內容以 Notion 中 Publish 為 true、Visibility 為 public 的紀錄為準。私人筆記不會出現在這裡。傳說對決遊戲 ID 是 htw0702aov。網站 htw0702.com 提供繁體中文、英文與日文。"
     },
     {
       "locale": "en",
       "kind": "wiki",
       "name": "Personal Wiki｜About Ting Ting",
       "slug": "about",
-      "updated": "2026-09-25",
-      "body": "Wang Hao Ting (筳筳). Taiwan. This page is the public wiki. Entries appear only when Notion marks them Publish and Visibility public. Private notes stay off this page. htw0702.com is available in Traditional Chinese, English, and Japanese."
+      "updated": "2026-09-28",
+      "body": "Wang Hao Ting (筳筳). Taiwan. This page is the public wiki. Entries appear only when Notion marks them Publish and Visibility public. Private notes stay off this page. Arena of Valor ID: htw0702aov. htw0702.com is available in Traditional Chinese, English, and Japanese."
     },
     {
       "locale": "jp",
       "kind": "wiki",
       "name": "個人Wiki｜筳筳について",
       "slug": "about",
-      "updated": "2026-09-25",
-      "body": "王顥筳（筳筳、Wang Hao Ting）。台湾。このページは公開ウィキです。Notion で Publish が true、Visibility が public の記録だけを載せます。非公開のメモは出しません。htw0702.com は繁体字中国語、英語、日本語です。"
+      "updated": "2026-09-28",
+      "body": "王顧筳（筳筳、Wang Hao Ting）。台湾。このページは公開ウィキです。Notion で Publish が true、Visibility が public の記録だけを載せます。非公開のメモは出しません。伝説対決のゲーム ID は htw0702aov。htw0702.com は繁体字中国語、英語、日本語です。"
     },
     {
       "locale": "tw",
       "kind": "works",
       "name": "htw0702.com｜個人網站",
       "slug": "htw0702-com",
-      "updated": "2026-09-25",
-      "body": "公開作品放在這一頁。現在收錄的是 htw0702.com，王顥筳的個人網站：繁體中文為主，並提供英文與日文。"
+      "updated": "2026-09-28",
+      "body": "公開作品放在這一頁。現在收錄的是 htw0702.com，王顧筳的個人網站：繁體中文為主，並提供英文與日文。"
     },
     {
       "locale": "en",
       "kind": "works",
       "name": "htw0702.com｜Personal site",
       "slug": "htw0702-com",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "Public works live on this page. Listed now is htw0702.com, Wang Hao Ting’s personal website: Traditional Chinese first, with English and Japanese."
     },
     {
@@ -45,15 +45,15 @@
       "kind": "works",
       "name": "htw0702.com｜個人サイト",
       "slug": "htw0702-com",
-      "updated": "2026-09-25",
-      "body": "公開作品はこのページに置きます。いま収録しているのは htw0702.com、王顥筳の個人サイトです。繁体字中国語が中心で、英語と日本語もあります。"
+      "updated": "2026-09-28",
+      "body": "公開作品はこのページに置きます。いま収録しているのは htw0702.com、王顧筳の個人サイトです。繁体字中国語が中心で、英語と日本語もあります。"
     },
     {
       "locale": "tw",
       "kind": "store",
       "name": "小賣所｜個人周邊與支持",
       "slug": "store",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "小賣所是個人周邊與支持的入口。公開品項若有設定，會列在這裡；付款連結只在設定好之後出現。私鑰、付款憑證與登入資訊不會出現在這個網站上。"
     },
     {
@@ -61,7 +61,7 @@
       "kind": "store",
       "name": "Shop｜Goods and support",
       "slug": "store",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "This is the door for personal goods and support. Public items appear here only after they are configured; payment links appear only after they are configured too. Private keys, payment credentials and sign-in secrets are never shown on this website."
     },
     {
@@ -69,7 +69,7 @@
       "kind": "store",
       "name": "売店｜品とサポート",
       "slug": "store",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "売店は、個人の品とサポートの入口です。公開する品は設定してから並べ、決済リンクも設定が済んでから表示します。秘密鍵、決済情報、ログイン情報はこのサイトに出しません。"
     },
     {
@@ -77,7 +77,7 @@
       "kind": "now",
       "name": "現在公開的",
       "slug": "now",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "現在公開的是這個網站。繁體中文是主要語言，英文與日文也可以讀。手記、作品、維基、社群、小賣所與搜尋都從首頁走得到。尚未在 Notion 發布的內容不會出現。"
     },
     {
@@ -85,7 +85,7 @@
       "kind": "now",
       "name": "Public right now",
       "slug": "now",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "What is public right now is this website. Traditional Chinese is the primary language, with English and Japanese alongside it. The journal, works, wiki, social channels, shop, and search are reached from the home page. Anything not published in Notion stays off the site."
     },
     {
@@ -93,7 +93,7 @@
       "kind": "now",
       "name": "いま公開していること",
       "slug": "now",
-      "updated": "2026-09-25",
+      "updated": "2026-09-28",
       "body": "いま公開しているのは、このサイトそのものです。繁体字中国語が主な言語で、英語と日本語でも読めます。手記、作品、ウィキ、ソーシャル、売店、検索はホームから行けます。Notion で公開していない内容は出ません。"
     }
   ]
