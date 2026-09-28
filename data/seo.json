@@ -4,11 +4,11 @@
     "tw": {
       "home": {
         "title": "筳筳｜htw0702",
-        "description": "筳筳的個人網站。王顥筳，來自台灣。維基、手記、作品與社群都放在 htw0702.com。"
+        "description": "筳筳的個人網站。王顧筳，來自台灣。維基、手記、作品與社群都放在 htw0702.com。"
       },
       "wiki": {
         "title": "個人維基｜筳筳",
-        "description": "王顥筳（筳筳）的公開維基。來自台灣。只顯示 Notion 中已發布且公開的紀錄。"
+        "description": "王顧筳（筳筳）的公開維基。來自台灣。只顯示 Notion 中已發布且公開的紀錄。"
       },
       "blog": {
         "title": "手記｜筳筳",
@@ -36,7 +36,7 @@
       },
       "games": {
         "title": "遊戲｜筳筳",
-        "description": "遊戲入口。暮霞｜MOS 是另外的戰隊品牌。個人站不放對戰資料。"
+        "description": "遊戲入口。傳說對決 ID：htw0702aov。暮霞｜MOS 是另外的戰隊品牌。個人站不放對戰資料。"
       },
       "admin": {
         "title": "工作室｜筳筳",
@@ -82,7 +82,7 @@
       },
       "games": {
         "title": "Games｜Ting Ting",
-        "description": "A games door. Muohsia MOS is a separate team. This personal site does not list match records."
+        "description": "A games door. Arena of Valor ID: htw0702aov. Muohsia MOS is a separate team. This personal site does not list match records."
       },
       "admin": {
         "title": "Studio｜Ting Ting",
@@ -96,11 +96,11 @@
     "jp": {
       "home": {
         "title": "筳筳｜htw0702",
-        "description": "筳筳の個人サイト。王顥筳、台湾出身。ウィキ、手記、作品、ソーシャルを htw0702.com に置いています。"
+        "description": "筳筳の個人サイト。王顧筳、台湾出身。ウィキ、手記、作品、ソーシャルを htw0702.com に置いています。"
       },
       "wiki": {
         "title": "ウィキ｜筳筳",
-        "description": "王顥筳（筳筳）の公開ウィキ。台湾出身。Notion で公開した記録だけを表示します。"
+        "description": "王顧筳（筳筳）の公開ウィキ。台湾出身。Notion で公開した記録だけを表示します。"
       },
       "blog": {
         "title": "手記｜筳筳",
@@ -128,7 +128,7 @@
       },
       "games": {
         "title": "ゲーム｜筳筳",
-        "description": "ゲームへの入口。暮霞｜MOS は別のチームです。この個人サイトに対戦記録は置きません。"
+        "description": "ゲームへの入口。伝説対決 ID：htw0702aov。暮霞｜MOS は別のチームです。この個人サイトに対戦記録は置きません。"
       },
       "admin": {
         "title": "スタジオ｜筳筳",
