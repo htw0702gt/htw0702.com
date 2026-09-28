@@ -3,15 +3,17 @@ const KEY = "aov-htw0702aov";
 const MAX = 900000;
 function clip(v, n) { return String(v ?? "").trim().slice(0, n); }
 function pair(v) { const o = v && typeof v === "object" ? v : {}; return { zh: clip(o.zh, 80), en: clip(o.en, 80) }; }
+function safeValue(value, depth = 0) {
+  if (value == null || typeof value === "boolean" || typeof value === "number") return value;
+  if (typeof value === "string") return clip(value, 500);
+  if (depth >= 8) return null;
+  if (Array.isArray(value)) return value.slice(0, 100).map(item => safeValue(item, depth + 1));
+  if (typeof value !== "object") return null;
+  return Object.fromEntries(Object.entries(value).filter(([key]) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(key) && key.length <= 40).slice(0, 100).map(([key, item]) => [key, safeValue(item, depth + 1)]));
+}
 function cleanMatch(row) {
   const m = row && typeof row === "object" ? row : {};
-  const out = {};
-  for (const [key, value] of Object.entries(m)) {
-    if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(key) || key.length > 32) continue;
-    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") out[key] = typeof value === "string" ? clip(value, 500) : value;
-    else if (value && typeof value === "object" && !Array.isArray(value)) out[key] = Object.fromEntries(Object.entries(value).filter(([k,v]) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(k) && (typeof v === "string" || typeof v === "number")).map(([k,v]) => [k, typeof v === "string" ? clip(v, 500) : v]));
-  }
-  return out;
+  return safeValue(m);
 }
 export function cleanAov(input, fallback) {
   const src = input && typeof input === "object" ? input : {};
